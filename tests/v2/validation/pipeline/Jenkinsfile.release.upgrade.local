@@ -40,6 +40,8 @@ node {
       branch = "${env.BRANCH}"
     }
 
+    def qaseID = "${env.QASE_TEST_RUN_ID}"
+
     // corral
     def corralBranch = "main"
     if ("${env.RANCHER_CORRAL_PACKAGES_REPO_BRANCH}" != "null" && "${env.RANCHER_CORRAL_PACKAGES_REPO_BRANCH}" != "") {
@@ -172,7 +174,7 @@ node {
               stage("Build Environment") {
                 try {
                   sh "docker run -v ${validationVolume}:/root --name ${buildTestContainer} -t --env-file ${envFile} " +
-                  "${imageName} sh -c \"${workPath}pipeline/scripts/setup_environment.sh\""
+                  "${imageName} sh -c \"${workPath}pipeline/scripts/setup_environment.sh; ${workPath}pipeline/scripts/build_qase_auto_testrun.sh\""
                 } catch(err) {
                    sh "docker stop ${buildTestContainer}"
                    sh "docker rm -v ${buildTestContainer}"
@@ -237,11 +239,13 @@ node {
                           dir("./${patchedConfigsDir}") {
                             sh "docker cp ${containerName}:${rootPath}${configsDir}/$it ."
                           }
+                          
                          } catch (err){
                            sh "docker stop ${containerName}"
                            sh "docker rm -v ${containerName}"
                          }
 
+                         sh "./${qaseRun} --startRun=false"
                          sh "docker stop ${containerName}"
                          sh "docker rm -v ${containerName}"
                        }
@@ -304,7 +308,8 @@ node {
                         string(name: 'TEST_PACKAGE', value: "${testPackage}"),
                         string(name: 'TAGS', value: "${defaultTag}"),
                         string(name: 'GOTEST_TESTCASE', value: "${testCase}"),
-                        string(name: 'RKE_VERSION', value: "${env.RKE_VERSION}")
+                        string(name: 'RKE_VERSION', value: "${env.RKE_VERSION}"),
+                        string(name: 'QASE_TEST_RUN_ID', value: "${testRunID}")
                       ]
 
                       jobs["$it-preupgrade"] = { build job: 'go-automation-freeform-job', parameters: goValidationParams }
@@ -312,11 +317,11 @@ node {
                       echo "Pre upgrade $it had failures: " + err
                     }
                   }
-
                   parallel jobs
                 } catch(err) {
                   echo "Pre upgrade tests had failures: " + err
                 }
+                sh "./${qaseRun} --startRun=false"
               }
               stage('Upgrade local cluster version') {
                 try {
@@ -341,13 +346,15 @@ node {
                         string(name: 'TEST_PACKAGE', value: "${testPackage}"),
                         string(name: 'TAGS', value: "${defaultTag}"),
                         string(name: 'GOTEST_TESTCASE', value: "${testCase}" ),
-                        string(name: 'RKE_VERSION', value: "${env.RKE_VERSION}")
+                        string(name: 'RKE_VERSION', value: "${env.RKE_VERSION}"),
+                        string(name: 'QASE_TEST_RUN_ID', value: "${testRunID}")
                       ]
 
                       build job: 'go-automation-freeform-job', parameters: goValidationParams
                 } catch(err) {
                   echo "Kubernetes upgrade tests had failures: " + err
                 }
+                sh "./${qaseRun} --startRun=false"
               }
               stage('Run postupgrade checks') {
                 try {
@@ -376,7 +383,8 @@ node {
                         string(name: 'TEST_PACKAGE', value: "${testPackage}"),
                         string(name: 'TAGS', value: "${defaultTag}"),
                         string(name: 'GOTEST_TESTCASE', value: "${testCase}"),
-                        string(name: 'RKE_VERSION', value: "${env.RKE_VERSION}")
+                        string(name: 'RKE_VERSION', value: "${env.RKE_VERSION}"),
+                        string(name: 'QASE_TEST_RUN_ID', value: "${testRunID}")
                       ]
 
                       jobs["$it-postupgrade"] = { build job: 'go-automation-freeform-job', parameters: goValidationParams }
@@ -389,6 +397,7 @@ node {
                 } catch(err){
                   echo "Post upgrade tests had failures: " + err
                 }
+                sh "./${qaseRun} --startRun=false"
               }
               stage('Delete Rancher and resources') {
                 if (cleanup.toBoolean()) {
