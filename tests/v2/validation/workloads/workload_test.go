@@ -5,23 +5,13 @@ package workloads
 import (
 	"testing"
 
-	projectsapi "github.com/rancher/rancher/tests/v2/actions/projects"
-	"github.com/rancher/rancher/tests/v2/actions/workloads/cronjob"
-	"github.com/rancher/rancher/tests/v2/actions/workloads/daemonset"
-	deployment "github.com/rancher/rancher/tests/v2/actions/workloads/deployment"
-	"github.com/rancher/rancher/tests/v2/actions/workloads/statefulset"
 	"github.com/rancher/shepherd/clients/rancher"
 	management "github.com/rancher/shepherd/clients/rancher/generated/management/v3"
-	"github.com/rancher/shepherd/extensions/charts"
 	"github.com/rancher/shepherd/extensions/clusters"
-	"github.com/rancher/shepherd/extensions/workloads"
-	namegen "github.com/rancher/shepherd/pkg/namegenerator"
 	"github.com/rancher/shepherd/pkg/session"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type WorkloadTestSuite struct {
@@ -58,12 +48,15 @@ func (w *WorkloadTestSuite) TestWorkloadDeployment() {
 	subSession := w.session.NewSession()
 	defer subSession.Cleanup()
 
-	log.Info("Creating new project and namespace")
-	_, namespace, err := projectsapi.CreateProjectAndNamespace(w.client, w.cluster.ID)
+	err := CreateDeploymentTest(w.client, w.cluster.ID)
 	require.NoError(w.T(), err)
+}
 
-	log.Info("Creating new deployment")
-	_, err = deployment.CreateDeployment(w.client, w.cluster.ID, namespace.Name, 1, "", "", false, false, true)
+func (w *WorkloadTestSuite) TestWorkloadSideKick() {
+	subSession := w.session.NewSession()
+	defer subSession.Cleanup()
+
+	err := DeploymentSideKickTest(w.client, w.cluster.ID)
 	require.NoError(w.T(), err)
 }
 
@@ -71,18 +64,7 @@ func (w *WorkloadTestSuite) TestWorkloadDaemonSet() {
 	subSession := w.session.NewSession()
 	defer subSession.Cleanup()
 
-	log.Info("Creating new project and namespace")
-	_, namespace, err := projectsapi.CreateProjectAndNamespace(w.client, w.cluster.ID)
-	require.NoError(w.T(), err)
-
-	log.Info("Creating new deamonset")
-	createdDaemonset, err := daemonset.CreateDaemonset(w.client, w.cluster.ID, namespace.Name, 1, "", "", false, false)
-	require.NoError(w.T(), err)
-
-	log.Info("Waiting deamonset comes up active")
-	err = charts.WatchAndWaitDaemonSets(w.client, w.cluster.ID, namespace.Name, metav1.ListOptions{
-		FieldSelector: "metadata.name=" + createdDaemonset.Name,
-	})
+	err := CreateDaemonSetTest(w.client, w.cluster.ID)
 	require.NoError(w.T(), err)
 }
 
@@ -90,37 +72,7 @@ func (w *WorkloadTestSuite) TestWorkloadCronjob() {
 	subSession := w.session.NewSession()
 	defer subSession.Cleanup()
 
-	log.Info("Creating new project and namespace")
-	_, namespace, err := projectsapi.CreateProjectAndNamespace(w.client, w.cluster.ID)
-	require.NoError(w.T(), err)
-
-	containerName := namegen.AppendRandomString("test-container")
-	pullPolicy := corev1.PullAlways
-
-	containerTemplate := workloads.NewContainer(
-		containerName,
-		nginxImageName,
-		pullPolicy,
-		[]corev1.VolumeMount{},
-		[]corev1.EnvFromSource{},
-		nil,
-		nil,
-		nil,
-	)
-	podTemplate := workloads.NewPodTemplate(
-		[]corev1.Container{containerTemplate},
-		[]corev1.Volume{},
-		[]corev1.LocalObjectReference{},
-		nil,
-		nil,
-	)
-
-	log.Info("Creating new cronjob")
-	cronJobTemplate, err := cronjob.CreateCronjob(w.client, w.cluster.ID, namespace.Name, "*/1 * * * *", podTemplate)
-	require.NoError(w.T(), err)
-
-	log.Info("Waiting cronjob comes up active")
-	err = cronjob.WatchAndWaitCronjob(w.client, w.cluster.ID, namespace.Name, cronJobTemplate)
+	err := CreateCronjobTest(w.client, w.cluster.ID)
 	require.NoError(w.T(), err)
 }
 
@@ -128,40 +80,59 @@ func (w *WorkloadTestSuite) TestWorkloadStatefulset() {
 	subSession := w.session.NewSession()
 	defer subSession.Cleanup()
 
-	log.Info("Creating new project and namespace")
-	_, namespace, err := projectsapi.CreateProjectAndNamespace(w.client, w.cluster.ID)
+	err := CreateStatefulsetTest(w.client, w.cluster.ID)
 	require.NoError(w.T(), err)
+}
 
-	containerName := namegen.AppendRandomString("test-container")
-	pullPolicy := corev1.PullAlways
+func (w *WorkloadTestSuite) TestWorkloadUpgrade() {
+	subSession := w.session.NewSession()
+	defer subSession.Cleanup()
 
-	containerTemplate := workloads.NewContainer(
-		containerName,
-		nginxImageName,
-		pullPolicy,
-		[]corev1.VolumeMount{},
-		[]corev1.EnvFromSource{},
-		nil,
-		nil,
-		nil,
-	)
-	podTemplate := workloads.NewPodTemplate(
-		[]corev1.Container{containerTemplate},
-		[]corev1.Volume{},
-		[]corev1.LocalObjectReference{},
-		nil,
-		nil,
-	)
-
-	log.Info("Creating new statefulset")
-	statefulsetTemplate, err := statefulset.CreateStatefulset(w.client, w.cluster.ID, namespace.Name, podTemplate, 1)
+	err := DeploymentUpgradeTest(w.client, w.cluster.ID)
 	require.NoError(w.T(), err)
+}
 
-	log.Info("Waiting statefulset comes up active")
-	err = charts.WatchAndWaitStatefulSets(w.client, w.cluster.ID, namespace.Name, metav1.ListOptions{
-		FieldSelector: "metadata.name=" + statefulsetTemplate.Name,
-	})
+func (w *WorkloadTestSuite) TestWorkloadPodScaleUp() {
+	subSession := w.session.NewSession()
+	defer subSession.Cleanup()
+
+	err := DeploymentPodScaleUpTest(w.client, w.cluster.ID)
 	require.NoError(w.T(), err)
+}
+
+func (w *WorkloadTestSuite) TestWorkloadPodScaleDown() {
+	subSession := w.session.NewSession()
+	defer subSession.Cleanup()
+
+	err := DeploymentPodScaleDownTest(w.client, w.cluster.ID)
+	require.NoError(w.T(), err)
+}
+
+func (w *WorkloadTestSuite) TestWorkloadPauseOrchestration() {
+	subSession := w.session.NewSession()
+	defer subSession.Cleanup()
+
+	err := DeploymentPauseOrchestrationTest(w.client, w.cluster.ID)
+	require.NoError(w.T(), err)
+}
+
+// NOTE: this is an example DO NOT MERGE
+func (w *WorkloadTestSuite) TestDemoSubTestCase1() {
+	//Do some test i.e provision a cluster for OS-checks, snapshot test, normal provisioning test... etc
+	// ---
+	// ---
+	// ---
+	//As part of the above test we now want to chain this with the network checks,
+	subSession := w.session.NewSession()
+	defer subSession.Cleanup()
+
+	workloadTests := GetAllWorkloadTests()
+	for _, workloadTest := range workloadTests {
+		w.Suite.Run(workloadTest.Name, func() {
+			err := workloadTest.TestFunc(w.client, w.cluster.ID)
+			require.NoError(w.T(), err)
+		})
+	}
 }
 
 func TestWorkloadTestSuite(t *testing.T) {
