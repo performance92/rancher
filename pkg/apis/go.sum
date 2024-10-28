@@ -100,8 +100,8 @@ github.com/rancher/norman v0.0.0-20240708202514-a0127673d1b9 h1:AlRMRs5mHJcdiK83
 github.com/rancher/norman v0.0.0-20240708202514-a0127673d1b9/go.mod h1:dyjfXBsNiroPWOdUZe7diUOUSLf6HQ/r2kEpwH/8zas=
 github.com/rancher/rke v1.6.3 h1:jZByofLNK/hB+EQH4FxIZgrUO1HRNek4wuuOjTA7ZME=
 github.com/rancher/rke v1.6.3/go.mod h1:n9ys1XDbjh3BN7GYl9Vbu+zm4CWVSBvpRkBGiJ9JvIw=
-github.com/rancher/wrangler/v3 v3.0.1-rc.1 h1:urJtho0sL4bZxgw7w1P9tabzDVcZyzzReFw+znCaqWc=
-github.com/rancher/wrangler/v3 v3.0.1-rc.1/go.mod h1:cGBYMrchAW13we6LlubfXAv1EJ3z0QzsXiGKTPr+IXg=
+github.com/rancher/wrangler/v3 v3.0.1-rc.4 h1:TOFp9Vv+D+O52MeuTM9M/aTT6OB/QZMoBchPfTSFMSc=
+github.com/rancher/wrangler/v3 v3.0.1-rc.4/go.mod h1:cGBYMrchAW13we6LlubfXAv1EJ3z0QzsXiGKTPr+IXg=
 github.com/rogpeppe/go-internal v1.11.0 h1:cWPaGQEPrBb5/AsnsZesgZZ9yb1OQ+GOISoDNXVBh4M=
 github.com/rogpeppe/go-internal v1.11.0/go.mod h1:ddIwULY96R17DhadqLgMfk9H9tvdUzkipdSkR5nkCZA=
 github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=
