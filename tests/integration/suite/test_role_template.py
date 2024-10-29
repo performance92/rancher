@@ -94,6 +94,7 @@ def test_context_crtb(admin_mc, admin_cc, remove_resource,
     assert "Cannot reference context [project] from [cluster] context" in \
         e.value.error.message
 
+
 def test_role_template_update_inherited_role(admin_mc, remove_resource,
                                              user_factory, admin_pc):
     client = admin_mc.client
