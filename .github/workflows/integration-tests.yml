@@ -103,12 +103,6 @@ jobs:
           sudo apt-get install -y python3-pip python3-dev libffi-dev libssl-dev
           sudo pip3 install --upgrade pip
           sudo pip3 install tox flake8
-
-      ## Helm Setup start
-      - name: Uninstall Helm
-        run: |
-          sudo rm -rf /usr/local/bin/helm ~/.helm /usr/local/bin/helm_v3
-
       - name: KDM data
         run: |
           mkdir -p bin
