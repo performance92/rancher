@@ -4,7 +4,6 @@ from rancher import ApiError
 import time
 
 from .common import random_str
-from .test_catalog import wait_for_template_to_be_created
 from .conftest import wait_until_available, wait_until, \
     cluster_and_client, user_project_client, \
     kubernetes_api_client, wait_for, ClusterContext, \
