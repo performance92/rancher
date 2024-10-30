@@ -1074,6 +1074,8 @@ func (p *Planner) generatePlanWithConfigFiles(controlPlane *rkev1.RKEControlPlan
 			return nodePlan, config, joinedServer, err
 		}
 
+		nodePlan, err = addNetworkingConfigFiles(nodePlan, controlPlane, entry)
+
 		bootstrapManifests, err := p.retrievalFunctions.GetBootstrapManifests(controlPlane)
 		if err != nil {
 			return nodePlan, config, joinedServer, err
@@ -1093,8 +1095,6 @@ func (p *Planner) generatePlanWithConfigFiles(controlPlane *rkev1.RKEControlPlan
 		if err != nil {
 			return nodePlan, config, joinedServer, err
 		}
-
-		nodePlan, err = addOtherFiles(nodePlan, controlPlane, entry)
 
 		idempotentScriptFile := plan.File{
 			Content: base64.StdEncoding.EncodeToString([]byte(idempotentActionScript)),
