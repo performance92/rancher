@@ -46,7 +46,7 @@ func CreateOrUpdateSecrets(secrets wcorev1.SecretController, secretInfo, field, 
 		Type:       v1.SecretTypeOpaque,
 	}
 
-	curr, err := secrets.Get(SecretsNamespace, name, metav1.GetOptions{})
+	curr, err := secrets.Cache().Get(SecretsNamespace, name)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return "", fmt.Errorf("error getting secret for %s : %w", name, err)
 	}
