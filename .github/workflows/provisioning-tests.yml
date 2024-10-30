@@ -37,6 +37,10 @@ jobs:
         run: |
           curl -sL https://releases.rancher.com/dapper/latest/dapper-$(uname -s)-$(uname -m) > ./.dapper
           chmod +x ./.dapper
+      - name: Configure Docker for cgroupfs
+        run: |
+          echo '{"exec-opts": ["native.cgroupdriver=cgroupfs"]}' > /etc/docker/daemon.json
+          systemctl restart docker
       - name: Run tests
         run: ./.dapper provisioning-tests
         env:
