@@ -292,7 +292,7 @@ func (p *Planner) addChartConfigs(nodePlan plan.NodePlan, controlPlane *rkev1.RK
 	return nodePlan, nil
 }
 
-func addOtherFiles(nodePlan plan.NodePlan, controlPlane *rkev1.RKEControlPlane, entry *planEntry) (plan.NodePlan, error) {
+func addNetworkingConfigFiles(nodePlan plan.NodePlan, controlPlane *rkev1.RKEControlPlane, entry *planEntry) (plan.NodePlan, error) {
 	nodePlan = addLocalClusterAuthenticationEndpointFile(nodePlan, controlPlane, entry)
 	return nodePlan, nil
 }
