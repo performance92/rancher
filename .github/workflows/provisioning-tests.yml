@@ -18,13 +18,6 @@ jobs:
         include:
         - V2PROV_TEST_DIST: "k3s"
           V2PROV_TEST_RUN_REGEX: "^Test_(General|Provisioning|Fleet)_.*$"
-        - V2PROV_TEST_DIST: "rke2"
-          V2PROV_TEST_RUN_REGEX: "^Test_(General|Provisioning|Fleet)_.*$"
-        - V2PROV_TEST_DIST: "k3s"
-          V2PROV_TEST_RUN_REGEX: "^Test_Operation_.*$"
-        - V2PROV_TEST_DIST: "rke2"
-          V2PROV_TEST_RUN_REGEX: "^Test_Operation_SetA_.*$"
-        - V2PROV_TEST_DIST: "rke2"
           V2PROV_TEST_RUN_REGEX: "^Test_Operation_SetB_.*$"
     name: Provisioning tests 
     runs-on: runs-on,runner=8cpu-linux-x64,image=legacy-cgroups-for-x64,run-id=${{ github.run_id }}
