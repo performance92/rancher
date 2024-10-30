@@ -183,7 +183,7 @@ func findLdapUser(guid string, lConn *ldapv3.Conn, adConfig *v3.ActiveDirectoryC
 
 func adConfiguration(sc *config.ScaledContext) (*v3.ActiveDirectoryConfig, error) {
 	authConfigs := sc.Management.AuthConfigs("")
-	secrets := sc.Core.Secrets("")
+	secrets := sc.Wrangler.Core.Secret()
 
 	authConfigObj, err := authConfigs.ObjectClient().UnstructuredClient().Get("activedirectory", metav1.GetOptions{})
 	if err != nil {
