@@ -27,7 +27,7 @@ jobs:
         - V2PROV_TEST_DIST: "rke2"
           V2PROV_TEST_RUN_REGEX: "^Test_Operation_SetB_.*$"
     name: Provisioning tests 
-    runs-on: runs-on,runner=8cpu-linux-x64,run-id=${{ github.run_id }}
+    runs-on: runs-on,runner=16cpu-linux-x64,ram=64,run-id=${{ github.run_id }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
