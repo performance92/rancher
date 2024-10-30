@@ -81,12 +81,6 @@ jobs:
           docker image ls
       - name: Install k3d
         run: curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
-      - name: Uninstall existing Python versions
-        run: |
-          sudo apt-get remove -y python3
-          sudo apt-get autoremove -y
-          sudo apt-get purge -y python3
-          sudo apt-get clean
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
